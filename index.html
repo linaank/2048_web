@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>2048</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main class="app">
+    <header class="top">
+        <img class="mascot" src="designs/spongebob.png" alt="Губка Боб">
+        <h1>2048</h1>
+        <div class="scores">
+            <div class="box"><span>Счёт</span><b id="score">0</b></div>
+            <div class="box"><span>Рекорд</span><b id="best">0</b></div>
+        </div>
+    </header>
+
+    <div class="bar">
+        <button id="restart" class="btn" title="Начать заново">↻ Заново</button>
+        <button id="undo" class="btn" title="Отмена хода">↶ Отмена хода</button>
+        <button id="lb-open" class="btn">Лидеры</button>
+    </div>
+
+    <section class="board" id="board">
+        <div id="grid"></div>
+        <div id="tiles"></div>
+        <div id="overlay" class="overlay" hidden>
+            <img src="designs/spongebob.png" alt="" class="over-img">
+            <p id="over-msg"></p>
+            <div id="save-box" class="save-box">
+                <input id="name" type="text" maxlength="20" placeholder="Ваше имя" autocomplete="off">
+                <button id="save" class="btn">Сохранить результат</button>
+            </div>
+            <button id="restart2" class="btn" title="Начать заново">↻ Начать заново</button>
+        </div>
+    </section>
+
+    <div class="dpad" id="dpad">
+        <button class="btn" data-dir="up" aria-label="Вверх">↑</button>
+        <button class="btn" data-dir="left" aria-label="Влево">←</button>
+        <button class="btn" data-dir="down" aria-label="Вниз">↓</button>
+        <button class="btn" data-dir="right" aria-label="Вправо">→</button>
+    </div>
+    <p class="hint"> Cвайпай по полю и склеивай одинаковые плитки!</p>
+</main>
+
+<div id="modal" class="modal" hidden>
+    <div class="modal-card">
+        <h2>Таблица лидеров</h2>
+        <table>
+            <thead><tr><th>#</th><th>Имя</th><th>Очки</th><th>Дата</th></tr></thead>
+            <tbody id="lb-body"></tbody>
+        </table>
+        <button id="lb-close" class="btn">Закрыть</button>
+    </div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>
