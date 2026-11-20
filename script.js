@@ -72,12 +72,73 @@ function render(ghosts = []) {
     bestEl.textContent = best;
 }
 
+function cellOf(dir, i, j) {
+    if (dir === 'left') return [i, j];
+    if (dir === 'right') return [i, N - 1 - j];
+    if (dir === 'up') return [j, i];
+    return [N - 1 - j, i];
+}
+
+function move(dir) {
+    if (over || !modal.hidden) return;
+    const snap = snapshot();
+    const grid = Array.from({ length: N }, () => Array(N).fill(null));
+    tiles.forEach(t => (grid[t.r][t.c] = t));
+    const out = [], ghosts = [];
+    let gained = 0, moved = false;
+
+    for (let i = 0; i < N; i++) {
+        const line = [];
+        for (let j = 0; j < N; j++) line.push(cellOf(dir, i, j));
+        let groups = line.map(([r, c]) => grid[r][c]).filter(Boolean).map(t => ({ v: t.v, src: [t] }));
+        for (let again = true; again;) {
+            again = false;
+            const next = [];
+            for (let n = 0; n < groups.length; n++) {
+                const g = groups[n], h = groups[n + 1];
+                if (h && h.v === g.v) {
+                    gained += g.v * 2;
+                    next.push({ v: g.v * 2, src: [...g.src, ...h.src] });
+                    n++; again = true;
+                } else next.push(g);
+            }
+            groups = next;
+        }
+        groups.forEach((g, k) => {
+            const [r, c] = line[k];
+            if (g.src.length > 1) {
+                moved = true;
+                g.src.forEach(t => ghosts.push({ id: t.id, r, c }));
+                out.push({ id: nextId++, v: g.v, r, c, merged: true });
+            } else {
+                const t = g.src[0];
+                if (t.r !== r || t.c !== c) moved = true;
+                t.r = r; t.c = c;
+                out.push(t);
+            }
+        });
+    }
+    if (!moved) return;
+
+    tiles = out;
+    score += gained;
+    spawn(Math.random() < 0.5 ? 1 : 2);
+    render(ghosts);
+}
+
 function newGame() {
     tiles = []; score = 0; prev = null; over = false; saved = false;
     clearBoard();
     spawn(1 + Math.floor(Math.random() * 3));
     render();
 }
+
+const KEYS = { ArrowLeft: 'left', ArrowRight: 'right', ArrowUp: 'up', ArrowDown: 'down' };
+document.addEventListener('keydown', e => {
+    if (e.target.tagName === 'INPUT' || !KEYS[e.key]) return;
+    e.preventDefault();
+    move(KEYS[e.key]);
+});
 
 (function init() {
     newGame();
