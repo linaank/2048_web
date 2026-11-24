@@ -70,6 +70,7 @@ function render(ghosts = []) {
     best = Math.max(best, score);
     scoreEl.textContent = score;
     bestEl.textContent = best;
+    undoBtn.disabled = !prev || over;
 }
 
 function cellOf(dir, i, j) {
@@ -120,10 +121,20 @@ function move(dir) {
     }
     if (!moved) return;
 
+    prev = snap;
     tiles = out;
     score += gained;
     spawn(Math.random() < 0.5 ? 1 : 2);
     render(ghosts);
+}
+
+function undo() {
+    if (!prev || over) return;
+    tiles = prev.tiles;
+    score = prev.score;
+    prev = null;
+    clearBoard();
+    render();
 }
 
 function newGame() {
@@ -138,6 +149,9 @@ document.addEventListener('keydown', e => {
     if (e.target.tagName === 'INPUT' || !KEYS[e.key]) return;
     e.preventDefault();
     move(KEYS[e.key]);
+    $('#restart').onclick = newGame;
+    $('#restart2').onclick = newGame;
+    undoBtn.onclick = undo;
 });
 
 (function init() {
