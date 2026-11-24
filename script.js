@@ -33,6 +33,13 @@ function spawn(n) {
     }
 }
 
+function canMove() {
+    if (tiles.length < N * N) return true;
+    const g = {};
+    tiles.forEach(t => (g[t.r + ',' + t.c] = t.v));
+    return tiles.some(t => g[t.r + ',' + (t.c + 1)] === t.v || g[(t.r + 1) + ',' + t.c] === t.v);
+}
+
 const tileClass = v => 'v' + (v <= 2048 ? v : 'big');
 
 function setPos(e, r, c) {
@@ -71,6 +78,15 @@ function render(ghosts = []) {
     scoreEl.textContent = score;
     bestEl.textContent = best;
     undoBtn.disabled = !prev || over;
+    updateOver();
+}
+
+function updateOver() {
+    overlay.hidden = !over;
+    document.body.classList.toggle('game-over', over);
+    if (!over) return;
+    overMsg.textContent = saved ? 'Рекорд сохранён!' : 'Игра окончена! Счёт: ' + score;
+    saveBox.hidden = saved;
 }
 
 function cellOf(dir, i, j) {
@@ -125,6 +141,7 @@ function move(dir) {
     tiles = out;
     score += gained;
     spawn(Math.random() < 0.5 ? 1 : 2);
+    over = !canMove();
     render(ghosts);
 }
 
