@@ -161,14 +161,59 @@ function newGame() {
     render();
 }
 
+const getLB = () => { try { return JSON.parse(localStorage.getItem(LS_LB)) || []; } catch { return []; } };
+
+function saveRecord() {
+    const name = nameInput.value.trim();
+    if (!name) { nameInput.focus(); return; }
+    const list = getLB();
+    list.push({ name, score, date: new Date().toISOString() });
+    list.sort((a, b) => b.score - a.score);
+    localStorage.setItem(LS_LB, JSON.stringify(list.slice(0, 10)));
+    saved = true;
+    nameInput.value = '';
+    updateOver();
+}
+
+function openLB() {
+    lbBody.innerHTML = '';
+    const list = getLB();
+    if (!list.length) {
+        lbBody.innerHTML = '<tr><td colspan="4">Пока пусто. Стань первым!</td></tr>';
+    }
+    list.forEach((rec, i) => {
+        const tr = document.createElement('tr');
+        const date = new Date(rec.date).toLocaleString('ru-RU', { dateStyle: 'short', timeStyle: 'short' });
+        [i + 1, rec.name, rec.score, date].forEach(v => {
+            const td = document.createElement('td');
+            td.textContent = v;
+            tr.appendChild(td);
+        });
+        lbBody.appendChild(tr);
+    });
+    modal.hidden = false;
+    document.body.classList.add('modal-open');
+}
+
+function closeLB() {
+    modal.hidden = true;
+    document.body.classList.remove('modal-open');
+}
+
 const KEYS = { ArrowLeft: 'left', ArrowRight: 'right', ArrowUp: 'up', ArrowDown: 'down' };
 document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') return closeLB();
     if (e.target.tagName === 'INPUT' || !KEYS[e.key]) return;
     e.preventDefault();
     move(KEYS[e.key]);
     $('#restart').onclick = newGame;
     $('#restart2').onclick = newGame;
     undoBtn.onclick = undo;
+    $('#save').onclick = saveRecord;
+    nameInput.addEventListener('keydown', e => { if (e.key === 'Enter') saveRecord(); });
+    $('#lb-open').onclick = openLB;
+    $('#lb-close').onclick = closeLB;
+    modal.addEventListener('click', e => { if (e.target === modal) closeLB(); });
 });
 
 (function init() {
