@@ -96,13 +96,14 @@ function cellOf(dir, i, j) {
     return [N - 1 - j, i];
 }
 
+function persist() {
+    localStorage.setItem(LS_STATE, JSON.stringify({ ...snapshot(), prev, over, saved, nextId }));
+    localStorage.setItem(LS_BEST, best);
+}
+
 function move(dir) {
     if (over || !modal.hidden) return;
     const snap = snapshot();
-    function persist() {
-        localStorage.setItem(LS_STATE, JSON.stringify({ ...snapshot(), prev, over, saved, nextId }));
-        localStorage.setItem(LS_BEST, best);
-    }
     const grid = Array.from({ length: N }, () => Array(N).fill(null));
     tiles.forEach(t => (grid[t.r][t.c] = t));
     const out = [], ghosts = [];
@@ -214,28 +215,31 @@ document.addEventListener('keydown', e => {
     if (e.target.tagName === 'INPUT' || !KEYS[e.key]) return;
     e.preventDefault();
     move(KEYS[e.key]);
-    $('#restart').onclick = newGame;
-    $('#restart2').onclick = newGame;
-    undoBtn.onclick = undo;
-    $('#save').onclick = saveRecord;
-    nameInput.addEventListener('keydown', e => { if (e.key === 'Enter') saveRecord(); });
-    let sx = 0, sy = 0;
-    const board = $('#board');
-    board.addEventListener('touchstart', e => { sx = e.touches[0].clientX; sy = e.touches[0].clientY; }, { passive: true });
-    board.addEventListener('touchend', e => {
-        const dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy;
-        if (Math.max(Math.abs(dx), Math.abs(dy)) < 30) return;
-        move(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up'));
-    });
-
-    $('#dpad').addEventListener('click', e => {
-        const b = e.target.closest('[data-dir]');
-        if (b) move(b.dataset.dir);
-    });
-    $('#lb-open').onclick = openLB;
-    $('#lb-close').onclick = closeLB;
-    modal.addEventListener('click', e => { if (e.target === modal) closeLB(); });
 });
+
+$('#restart').onclick = newGame;
+$('#restart2').onclick = newGame;
+undoBtn.onclick = undo;
+$('#save').onclick = saveRecord;
+nameInput.addEventListener('keydown', e => { if (e.key === 'Enter') saveRecord(); });
+
+let sx = 0, sy = 0;
+const board = $('#board');
+board.addEventListener('touchstart', e => { sx = e.touches[0].clientX; sy = e.touches[0].clientY; }, { passive: true });
+board.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy;
+    if (Math.max(Math.abs(dx), Math.abs(dy)) < 30) return;
+    move(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up'));
+});
+
+$('#dpad').addEventListener('click', e => {
+    const b = e.target.closest('[data-dir]');
+    if (b) move(b.dataset.dir);
+});
+
+$('#lb-open').onclick = openLB;
+$('#lb-close').onclick = closeLB;
+modal.addEventListener('click', e => { if (e.target === modal) closeLB(); });
 
 (function init() {
     try {
